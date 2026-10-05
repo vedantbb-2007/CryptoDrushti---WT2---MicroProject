@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CryptoDrushti | Crypto Analytics</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    /* Cyber Theme Base Styles */
+    body { 
+      background-color: #0a0c10; 
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: #e2e8f0;
+      padding-top: 4rem; 
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Navbar Cyber Tweaks */
+    .navbar {
+      border-bottom: 2px solid #00f0ff;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+    .navbar-brand {
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #00f0ff !important;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+
+    /* Hero Section */
+    header.cyber-hero {
+      background: linear-gradient(135deg, #10141d 0%, #07090e 100%) !important;
+      border-bottom: 1px solid #ff007f !important;
+      box-shadow: 0 5px 20px rgba(255, 0, 127, 0.1);
+    }
+    .cyber-title {
+      color: #ff007f !important;
+      text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+    }
+    .cyber-text-muted {
+      color: #8a99ad !important;
+    }
+
+    /* Cyber Cards & Sections */
+    .card, .list-group-item { 
+      background-color: rgba(20, 24, 33, 0.8) !important; 
+      border: 1px solid #2d3748 !important;
+      color: #e2e8f0 !important;
+      backdrop-filter: blur(4px);
+    }
+    .card:hover {
+      border-color: #00f0ff !important;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2) !important;
+    }
+    .coin-identity img { width: 32px; height: 32px; border-radius: 50%; }
+
+    /* Custom Buttons & Badges */
+    .btn-cyber-primary {
+      background: transparent;
+      color: #00f0ff;
+      border: 1px solid #00f0ff;
+      transition: all 0.3s ease;
+    }
+    .btn-cyber-primary:hover, .btn-cyber-primary.active {
+      background: #00f0ff;
+      color: #0a0c10;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+    .btn-cyber-outline {
+      border: 1px solid #2d3748;
+      color: #8a99ad;
+    }
+    .btn-cyber-outline:hover {
+      border-color: #ff007f;
+      color: #ff007f;
+    }
+    
+    .bg-cyber-dark {
+      background-color: #0d1117 !important;
+      border: 1px solid #2d3748;
+      color: #00f0ff !important;
+    }
+
+    /* Custom scrollbars for cyber look */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0c10; }
+    ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00f0ff; }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">CryptoDrushti</a>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav ms-auto align-items-center gap-2">
+          <li class="nav-item"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#chart-section">Analysis</a></li>
+          <li class="nav-item"><a class="nav-link" href="#recommend">Insights</a></li>
+          <li class="nav-item"><a class="nav-link" href="#watchlist">Watchlist</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="cyber-hero py-4 mb-4">
+    <div class="container">
+      <h1 class="display-6 fw-bold cyber-title">CryptoDrushti</h1>
+      <p class="lead cyber-text-muted mb-0">A basic rule-based tracking dashboard for top cryptocurrency market data.</p>
+    </div>
+  </header>
+
+  <main class="container my-4">
+    <div id="alertArea"></div>
+
+    <!-- ===================== DASHBOARD: COIN CARDS ===================== -->
+    <section id="dashboard" class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold text-uppercase tracking-wider text-info">Top 5 Crypto Assets</h2>
+        <button class="btn btn-sm btn-cyber-primary" id="refreshBtn">Refresh Data</button>
+      </div>
+
+      <div class="row g-3" id="coinCardsRow">
+        <div class="col-12 text-center py-4" id="loadingSpinner">
+          <div class="spinner-border text-info" role="status"></div>
+          <p class="mt-2 cyber-text-muted">Loading API data Matrix...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CHART SECTION ===================== -->
+    <section id="chart-section" class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold text-uppercase text-info">Market Variations</h2>
+        <div class="btn-group btn-group-sm" id="chartToggle">
+          <button type="button" class="btn btn-cyber-primary active" data-mode="change">% Change</button>
+          <button type="button" class="btn btn-cyber-primary" data-mode="price">Price (USD)</button>
+        </div>
+      </div>
+      <div class="card p-3 shadow-sm">
+        <canvas id="priceChart" height="100"></canvas>
+      </div>
+    </section>
+
+    <!-- ===================== MARKET INSIGHT ENGINE ===================== -->
+    <section id="recommend" class="mb-5">
+      <h2 class="h5 fw-bold mb-3 text-uppercase text-info">Calculated Standings</h2>
+      <div class="row g-3">
+        <div class="col-md-7">
+          <div class="card p-3 shadow-sm h-100">
+            <h6 class="fw-bold text-secondary mb-2 text-uppercase small">Automated Rule Output</h6>
+            <div id="insightResponseBox" class="p-3 bg-cyber-dark rounded mb-2 small">
+              Click the button below to parse current token data variables.
+            </div>
+            <button class="btn btn-sm btn-cyber-primary w-100" id="runInsightBtn">Execute Analysis Rules</button>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="card p-3 shadow-sm h-100">
+            <h6 class="fw-bold text-secondary mb-2 text-uppercase small">Rankings List</h6>
+            <ul class="list-group list-group-flush" id="signalList">
+              <li class="list-group-item cyber-text-muted small">Awaiting tracking initialization...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WATCHLIST ===================== -->
+    <section id="watchlist" class="mb-5">
+      <h2 class="h5 fw-bold mb-3 text-uppercase text-info">Active Watchlist</h2>
+      <div class="card p-3 shadow-sm">
+        <div id="watchlistItems" class="d-flex flex-wrap gap-2">
+          <span class="cyber-text-muted small">No items added to session memory.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-dark text-white py-3 text-center mt-5" style="border-top: 1px solid #2d3748;">
+    <div class="container">
+      <p class="small mb-1">CryptoDrushti - WT2 MicroProject</p>
+      <p class="x-small text-muted mb-0" style="font-size: 0.8rem;">Powered by public CoinGecko Rest API architecture.</p>
+    </div>
+  </footer>
+
+  <!-- ===================== JAVASCRIPT LOGIC ===================== -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const CONFIG = {
+      BASE_URL: "https://api.coingecko.com/api/v3",
+      COINS: ["bitcoin", "ethereum", "tether", "binancecoin", "solana"],
+      INTERVAL: 60000
+    };
+
+    let latestCoinData = [];
+    let priceChartInstance = null;
+    let currentChartMode = "change";
+    let watchlist = [];
+
+    async function fetchMarkets() {
+      const url = `${CONFIG.BASE_URL}/coins/markets?vs_currency=usd&ids=${CONFIG.COINS.join(",")}&order=market_cap_desc&price_change_percentage=24h`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("API Failure Status");
+      return await response.json();
+    }
+
+    function renderCards(coins) {
+      const row = document.getElementById("coinCardsRow");
+      row.innerHTML = coins.map(coin => {
+        const change = coin.price_change_percentage_24h ?? 0;
+        const isPinned = watchlist.some(c => c.id === coin.id);
+        
+        return `
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="coin-identity d-flex align-items-center gap-2">
+                    <img src="${coin.image}" alt="">
+                    <div>
+                      <h3 class="h6 mb-0 fw-bold">${coin.name}</h3>
+                      <span class="text-uppercase cyber-text-muted small">${coin.symbol}</span>
+                    </div>
+                  </div>
+                  <button class="btn btn-sm ${isPinned ? 'btn-danger' : 'btn-cyber-outline'} fav-toggle-btn" data-id="${coin.id}" data-name="${coin.name}">
+                    ${isPinned ? 'Remove' : 'Favorite'}
+                  </button>
+                </div>
+                <h4 class="fw-bold text-white">$${coin.current_price.toLocaleString()}</h4>
+                <span class="badge ${change >= 0 ? 'bg-success text-dark' : 'bg-danger'}">
+                  ${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".fav-toggle-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          toggleWatchlist(btn.dataset.id, btn.dataset.name);
+          renderCards(latestCoinData);
+        });
+      });
+    }
+
+    function renderChart(coins, mode) {
+      const ctx = document.getElementById("priceChart").getContext("2d");
+      const labels = coins.map(c => c.symbol.toUpperCase());
+      const dataValues = mode === "price" ? coins.map(c => c.current_price) : coins.map(c => c.price_change_percentage_24h ?? 0);
+      
+      if (priceChartInstance) priceChartInstance.destroy();
+
+      // Cyber Colors for Dark Mode Chart
+      const positiveColor = "#00f0ff"; // Neon Cyan
+      const negativeColor = "#ff007f"; // Neon Pink
+
+      priceChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: mode === "price" ? "Price (USD)" : "24h % Change",
+            data: dataValues,
+            backgroundColor: mode === "price" ? "#00f0ff" : dataValues.map(v => v >= 0 ? positiveColor : negativeColor),
+            borderColor: mode === "price" ? "#00c8ff" : dataValues.map(v => v >= 0 ? "#00c8ff" : "#d0006f"),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { labels: { color: '#8a99ad' } }
+          },
+          scales: {
+            x: { ticks: { color: '#8a99ad' }, grid: { color: 'rgba(45, 55, 72, 0.3)' } },
+            y: { ticks: { color: '#8a99ad' }, grid: { color: 'rgba(45, 55, 72, 0.3)' } }
+          }
+        }
+      });
+    }
+
+    function toggleWatchlist(id, name) {
+      if (watchlist.some(c => c.id === id)) {
+        watchlist = watchlist.filter(c => c.id !== id);
+      } else {
+        watchlist.push({ id, name });
+      }
+      renderWatchlistUI();
+    }
+
+    function renderWatchlistUI() {
+      const container = document.getElementById("watchlistItems");
+      if (watchlist.length === 0) {
+        container.innerHTML = `<span class="cyber-text-muted small">No items added to session memory.</span>`;
+        return;
+      }
+      container.innerHTML = watchlist.map(c => `
+        <span class="badge bg-cyber-dark p-2 border border-info">
+          ${c.name}
+        </span>
+      `).join("");
+    }
+
+    function executeRules() {
+      const box = document.getElementById("insightResponseBox");
+      if (latestCoinData.length === 0) return;
+
+      const sorted = [...latestCoinData].sort((a, b) => (b.price_change_percentage_24h ?? 0) - (a.price_change_percentage_24h ?? 0));
+      box.innerHTML = `
+        High Momentum Asset: <strong class="text-info">${sorted[0].name}</strong> (${sorted[0].price_change_percentage_24h.toFixed(2)}%)<br>
+        Low Momentum Asset: <strong class="text-danger">${sorted[sorted.length - 1].name}</strong> (${sorted[sorted.length - 1].price_change_percentage_24h.toFixed(2)}%)
+      `;
+    }
+
+    function updateSignals(coins) {
+      const list = document.getElementById("signalList");
+      const sorted = [...coins].sort((a, b) => (b.price_change_percentage_24h ?? 0) - (a.price_change_percentage_24h ?? 0));
+      list.innerHTML = sorted.map(c => `
+        <li class="list-group-item d-flex justify-content-between align-items-center small">
+          <span>${c.name}</span>
+          <span class="fw-bold ${c.price_change_percentage_24h >= 0 ? 'text-info' : 'text-danger'}">
+            ${c.price_change_percentage_24h.toFixed(2)}%
+          </span>
+        </li>
+      `).join("");
+    }
+
+    async function loadData() {
+      try {
+        const data = await fetchMarkets();
+        latestCoinData = data;
+        document.getElementById("loadingSpinner")?.remove();
+        renderCards(data);
+        renderChart(data, currentChartMode);
+        updateSignals(data);
+      } catch (e) {
+        document.getElementById("alertArea").innerHTML = `<div class="alert alert-danger m-2">Error processing API request stream.</div>`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadData();
+      setInterval(loadData, CONFIG.INTERVAL);
+
+      document.getElementById("refreshBtn").addEventListener("click", loadData);
+      document.getElementById("runInsightBtn").addEventListener("click", executeRules);
+
+      document.querySelectorAll("#chartToggle button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#chartToggle button").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentChartMode = btn.dataset.mode;
+          renderChart(latestCoinData, currentChartMode);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
